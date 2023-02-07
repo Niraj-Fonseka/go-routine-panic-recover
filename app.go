@@ -11,23 +11,23 @@ func main() {
 	worker_one := NewWorker("one", 2*time.Second)
 	worker_two := NewWorker("two", 5*time.Second)
 
-	workers := make(chan *Worker, 2)
+	workers := make(chan WorkerInterface, 2)
 
 	go worker_one.Work(workers)
 	go worker_two.Work(workers)
 
 	for w := range workers {
-		fmt.Printf("panic happened in the worker : %s\n", (*w).GetWorkerID())
+		fmt.Printf("panic happened in the worker : %s\n", w.GetWorkerID())
 
-		go (*w).Work(workers)
+		go w.(*Worker).Work(workers)
 	}
 
 }
 
-// type WorkerInterface interface {
-// 	GetWorkerID() string
-// 	Work(worker chan<- *WorkerInterface) (err error)
-// }
+type WorkerInterface interface {
+	GetWorkerID() string
+	Work(worker chan<- WorkerInterface) (err error)
+}
 
 type Worker struct {
 	ID       string
@@ -50,7 +50,7 @@ func (w *Worker) GetSleepDuration() time.Duration {
 	return w.Duration
 }
 
-func (w *Worker) Work(worker chan<- *Worker) (err error) {
+func (w *Worker) Work(worker chan<- WorkerInterface) (err error) {
 	fmt.Printf("Starting Worker : %s \n", w.GetWorkerID())
 	rand.Seed(time.Now().Unix())
 

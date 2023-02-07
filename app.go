@@ -9,12 +9,12 @@ import (
 func main() {
 
 	worker_one := NewWorker("one", 2*time.Second)
-	worker_two := NewWorker("two", 5*time.Second)
+	//worker_two := NewWorker("two", 5*time.Second)
 
 	workers := make(chan WorkerInterface, 2)
 
 	go worker_one.Work(workers)
-	go worker_two.Work(workers)
+	//go worker_two.Work(workers)
 
 	for w := range workers {
 		fmt.Printf("panic happened in the worker : %s\n", w.GetWorkerID())
@@ -52,10 +52,10 @@ func (w *Worker) GetSleepDuration() time.Duration {
 
 func (w *Worker) Work(worker chan<- WorkerInterface) (err error) {
 	fmt.Printf("Starting Worker : %s \n", w.GetWorkerID())
-	rand.Seed(time.Now().Unix())
 
 	defer func() {
 		if r := recover(); r != nil {
+			fmt.Println("recover r : ", r)
 			if err, ok := r.(error); ok {
 				w.Err = err
 			} else {
@@ -68,6 +68,7 @@ func (w *Worker) Work(worker chan<- WorkerInterface) (err error) {
 	}()
 
 	for {
+		rand.Seed(time.Now().UnixNano())
 		r := rand.Intn(100)
 
 		fmt.Printf("worker %s doing work ..\n", w.GetWorkerID())
@@ -75,6 +76,6 @@ func (w *Worker) Work(worker chan<- WorkerInterface) (err error) {
 			panic(fmt.Errorf("error happened because the random number was : %d \n", r))
 		}
 
-		time.Sleep(w.GetSleepDuration())
+		time.Sleep(10 * time.Second)
 	}
 }

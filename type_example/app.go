@@ -2,80 +2,25 @@ package main
 
 import (
 	"fmt"
-	"math/rand"
+	"go-routine-panic-recover/type_example/workers"
 	"time"
 )
 
 func main() {
 
-	worker_one := NewWorker("one", 2*time.Second)
-	worker_two := NewWorker("two", 5*time.Second)
+	worker_one := workers.NewWorker("worker_1", 2*time.Second)
+	worker_two := workers.NewWorker("worker_1", 5*time.Second)
 
-	workers := make(chan WorkerInterface, 2)
+	wrks := make(chan *workers.Worker, 2)
 
-	go worker_one.Work(workers)
-	go worker_two.Work(workers)
+	go worker_one.Work(wrks)
+	go worker_two.Work(wrks)
 
-	for w := range workers {
-		fmt.Printf("panic happened in the worker : %s\n", w.GetWorkerID())
+	for w := range wrks {
+		fmt.Printf("\033[31m---------------- PANIC happened in worker : \033[0m\033[34m%s\033[0m\033[31m because %s\033[0m\n", w.GetWorkerID(), w.GetError().Error())
 
-		go w.(*Worker).Work(workers)
+		fmt.Printf("\033[32m-------------\033[0m \033[34m%s\033[0m \033[32mrecovering ...\033[0m \n", w.GetWorkerID())
+		go w.Work(wrks)
 	}
 
-}
-
-type WorkerInterface interface {
-	GetWorkerID() string
-	Work(worker chan<- WorkerInterface) (err error)
-}
-
-type Worker struct {
-	ID       string
-	Err      error
-	Duration time.Duration
-}
-
-func NewWorker(id string, sleep time.Duration) *Worker {
-	return &Worker{
-		ID:       id,
-		Duration: sleep,
-	}
-}
-
-func (w *Worker) GetWorkerID() string {
-	return w.ID
-}
-
-func (w *Worker) GetSleepDuration() time.Duration {
-	return w.Duration
-}
-
-func (w *Worker) Work(worker chan<- WorkerInterface) (err error) {
-	fmt.Printf("Starting Worker : %s \n", w.GetWorkerID())
-
-	defer func() {
-		if r := recover(); r != nil {
-			fmt.Println("recover r : ", r)
-			if err, ok := r.(error); ok {
-				w.Err = err
-			} else {
-				w.Err = fmt.Errorf("Panic happened with %v", r)
-			}
-		} else {
-			w.Err = err
-		}
-		worker <- w
-	}()
-
-	for {
-		rand.Seed(time.Now().UnixNano())
-		r := rand.Intn(100)
-
-		fmt.Printf("worker %s doing work ..\n", w.GetWorkerID())
-		if r%2 == 0 {
-			panic(fmt.Errorf("error happened because the random number was : %d \n", r))
-		}
-
-		time.Sleep(10 * time.Second)
-	}
 }

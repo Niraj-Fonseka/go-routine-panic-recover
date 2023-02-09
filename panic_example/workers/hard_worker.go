@@ -7,46 +7,33 @@ import (
 	"time"
 )
 
-type SlowWorker struct {
+type Worker struct {
 	ID       string
 	Err      error
 	Duration time.Duration
 }
 
-func NewSlowWorker(id string, sleep time.Duration) *SlowWorker {
-	return &SlowWorker{
+func NewWorker(id string, sleep time.Duration) *Worker {
+	return &Worker{
 		ID:       id,
 		Duration: sleep,
 	}
 }
 
-func (w *SlowWorker) GetError() error {
+func (w *Worker) GetError() error {
 	return w.Err
 }
 
-func (w *SlowWorker) GetWorkerID() string {
+func (w *Worker) GetWorkerID() string {
 	return w.ID
 }
 
-func (w *SlowWorker) GetSleepDuration() time.Duration {
+func (w *Worker) GetSleepDuration() time.Duration {
 	return w.Duration
 }
 
-func (w *SlowWorker) Work(worker chan<- WorkerInterface) (err error) {
+func (w *Worker) Work() (err error) {
 	fmt.Printf("\033[37mStarting Worker :\033[0m \033[34m%s\033[0m \n\n", w.GetWorkerID())
-
-	defer func() {
-		if r := recover(); r != nil {
-			if err, ok := r.(error); ok {
-				w.Err = err
-			} else {
-				w.Err = fmt.Errorf("error : %v", r)
-			}
-		} else {
-			w.Err = err
-		}
-		worker <- w
-	}()
 
 	for {
 		rand.Seed(time.Now().UnixNano())
@@ -57,6 +44,6 @@ func (w *SlowWorker) Work(worker chan<- WorkerInterface) (err error) {
 			panic(fmt.Sprintf("random %d is prime \n", b))
 		}
 
-		time.Sleep(10 * time.Second)
+		time.Sleep(w.GetSleepDuration())
 	}
 }

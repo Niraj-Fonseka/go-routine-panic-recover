@@ -9,7 +9,7 @@ import (
 func main() {
 
 	worker_one := workers.NewWorker("worker_1", 2*time.Second)
-	worker_two := workers.NewWorker("worker_1", 5*time.Second)
+	worker_two := workers.NewWorker("worker_2", 5*time.Second)
 
 	wrks := make(chan *workers.Worker, 2)
 

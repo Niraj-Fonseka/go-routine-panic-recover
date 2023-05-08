@@ -9,12 +9,10 @@ import (
 func main() {
 
 	worker_one := workers.NewWorker("worker_1", 2*time.Second)
-	worker_two := workers.NewWorker("worker_2", 5*time.Second)
 
-	wrks := make(chan *workers.Worker, 2)
+	wrks := make(chan *workers.Worker, 1)
 
 	go worker_one.Work(wrks)
-	go worker_two.Work(wrks)
 
 	for w := range wrks {
 		fmt.Printf("\033[31m---------------- PANIC happened in worker : \033[0m\033[34m%s\033[0m\033[31m because %s\033[0m\n", w.GetWorkerID(), w.GetError().Error())

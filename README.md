@@ -9,4 +9,4 @@ Code for [Panic Handling and Recovery in Go-Routines](https://medium.com/@fonsek
     - `make panic-recover` 
 
 - Example that simulates panic and recovery with multiple go routines
-    - `make panic-recover-double` 
+    - `make panic-recover-multiple` 

@@ -1,10 +1,9 @@
 
+cause-panic:
+	@$(MAKE) -C panic run
 
-run-panic:
-	@$(MAKE) -C panic_example run
+panic-recover:
+	@$(MAKE) -C panic_recover run
 
-run-type:
-	@$(MAKE) -C type_example run
-
-run-interface:
-	@$(MAKE) -C interface_example run
+panic-recover-multiple:
+	@$(MAKE) -C panic_recover_multiple run
